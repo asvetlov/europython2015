@@ -1,0 +1,38 @@
+1. Intro into aiohttp client
+2. aiohttp server
+
+3. coroutine concept
+4. future
+5. task
+
+6. debugging (show next/step feature)
+
+7. writing unit tests
+   explicit loop
+   PYTHONASYNCIODEBUG=1
+
+8. writing client
+   redis client using streams API
+
+9. server
+   very trivial http server (no routes, 1 constant page or something like this)
+
+10. protocols
+   trivial protocol implementation
+   protocol approach limitations
+
+11. flow control
+   transport/protocol level
+   streams level
+
+12. event loop basics
+   add_reader/remove_reader, add_writer/remove_writer
+   simple library without protocols (aiopg, maybe butter???)
+
+13. timers
+   call_soon/call_later
+   importance of timer support in event loop
+
+14. thread safety
+   run_in_executor
+   janus
