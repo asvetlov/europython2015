@@ -27,20 +27,39 @@ class Redis:
         self._parser = hiredis.Reader()
         self._queue = collections.deque()
 
-
     def close(self):
-        pass
+        if self._task is None:
+            return
+        self._writer.close()
+        self._task.cancel()
+        while self._queue:
+            waiter = self._queue.popleft()
+            waiter.cancel()
 
     @asyncio.coroutine
     def wait_closed(self):
-        pass
+        if self._task is None:
+            return
+        yield from self._task
+        self._task = None
 
-    @asyncio.coroutine
     def execute(self, cmd, *args):
-        cmd = cmd.upper().strip()
         fut = asyncio.Future(loop=self._loop)
         self._queue.append(fut)
-        self._writer.write(packet)
+        buf = bytearray()
+
+        def add(data):
+            buf.extend(data + b'\r\n')
+
+        args = (cmd,) + args
+
+        add(b'*' + str(len(args)).encode('utf-8'))
+        for arg in args:
+            assert isinstance(arg, bytes)
+            add(b'$' + str(len(arg)).encode('utf-8'))
+            add(arg)
+
+        self._writer.write(buf)
         return fut
 
     @asyncio.coroutine
@@ -49,6 +68,7 @@ class Redis:
                                                   port=self._port,
                                                   loop=self._loop)
         self._reader, self._writer  = r, w
+        self._task = self._loop.create_task(self._read_task())
 
     @asyncio.coroutine
     def _read_task(self):
@@ -60,16 +80,16 @@ class Redis:
             self._parser.feed(data)
             while True:
                 try:
-                    answer = self._parser.get()
+                    answer = self._parser.gets()
                 except hiredis.ProtocolError:
                     self.close()
                     return
-                if not answer:
-                    continue
+                if answer == False:
+                    break
                 waiter = self._queue.popleft()
                 if waiter.done():
                     continue
-                if isinstance(answer, hiredis.RedisError):
+                if isinstance(answer, hiredis.ReplyError):
                     waiter.set_exception(answer)
                 else:
                     waiter.set_result(answer)
@@ -87,11 +107,20 @@ class TestRedis(unittest.TestCase):
         self.loop.run_until_complete(self.redis.wait_closed())
         self.loop.close()
 
-    def test_alone_get(self):
+    def test_get_missing_key(self):
         @asyncio.coroutine
         def go():
-            ret = yield from self.redis.execute('get', 'missing_key')
-            self.assertEqual(None, ret)
+            ret = yield from self.redis.execute(b'GET', b'missing_key')
+            self.assertIsNone(ret)
+
+        self.loop.run_until_complete(go())
+
+    def test_set_get(self):
+        @asyncio.coroutine
+        def go():
+            yield from self.redis.execute(b'SET', b'key', b'val')
+            ret = yield from self.redis.execute(b'GET', b'key')
+            self.assertEqual(b'val', ret)
 
         self.loop.run_until_complete(go())
 
