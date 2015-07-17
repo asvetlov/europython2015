@@ -36,3 +36,22 @@
 14. thread safety
    run_in_executor
    janus
+
+
+
+
+Underline the fact that async code forces all your code to be async:
+
+1. If you call coroutine use `yield from` expression.
+2. If your function has `yield from` inside mark is with `@asyncio.coroutine` decorator.
+
+Yes, using asyncio infects your code in async way: you should not use sync call which may take a while for execution.
+
+Describe the difference between coroutine and task.
+
+1. coroutine is like an async function: use `yield from` for calling it. 
+   coro() call makes a generator instance, you should *unwind* it.
+2. Task is for making new lightweight thread. Dont overuse it: tasks are cheap but not so cheap as coroutintes.
+   Always *join* a task by `yield from` or other asyncio funcions.
+
+
