@@ -58,5 +58,9 @@ class TestTimer(unittest.TestCase):
 
     def test_ctor(self):
         timer = Timer(loop=self.loop)
-        self.assertIs(loop, self._loop)
+        self.assertIs(self.loop, timer._loop)
         timer.close()
+
+
+if __name__ == '__main__':
+    unittest.main()
