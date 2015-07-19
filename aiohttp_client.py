@@ -1,18 +1,20 @@
 import asyncio
 import aiohttp
+import binascii
+
 
 @asyncio.coroutine
-def go(client):
+def get(client):
     print('Get data from httpbin.org')
     resp = yield from client.get('http://httpbin.org/get')
     print('Reponse code', resp.status)
     text = yield from resp.text()
     print(text)
     yield from resp.release()
-    print("-"*60)
+
 
 @asyncio.coroutine
-def go_with_timeout(client):
+def get_with_timeout(client):
     print('Get data from httpbin.org with timeout')
     try:
         coro = client.get('http://httpbin.org/delay/10')
@@ -23,9 +25,34 @@ def go_with_timeout(client):
         print("No timeout exception, should never happen")
 
 
+@asyncio.coroutine
+def get_random_data(client, num):
+    resp = yield from client.get('http://httpbin.org/bytes/16')
+    data = yield from resp.read()
+    print("Data {}: {}".format(num, binascii.hexlify(data).decode('utf-8')))
+    yield from resp.release()
+
+
+@asyncio.coroutine
+def get_multiple(client):
+    print("Fetch by 3 parallel requests")
+    coros = []
+    for i in range(10):
+        coros.append(get_random_data(client, i))
+
+    yield from asyncio.gather(*coros)
+
+
 loop = asyncio.get_event_loop()
 client = aiohttp.ClientSession()
-loop.run_until_complete(go(client))
-loop.run_until_complete(go_with_timeout(client))
+
+loop.run_until_complete(get(client))
+print("-"*60)
+
+loop.run_until_complete(get_with_timeout(client))
+print("-"*60)
+
+loop.run_until_complete(get_multiple(client))
+
 client.close()
 print("DONE")
