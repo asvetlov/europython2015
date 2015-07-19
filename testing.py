@@ -20,6 +20,13 @@ class Test(unittest.TestCase):
 
         self.loop.run_until_complete(go())
 
+    def test_pythonasynciodebug(self):
+        @asyncio.coroutine
+        def go():
+            asyncio.sleep(0.5, loop=self.loop)  # missed `yield from`
+
+        self.loop.run_until_complete(go())
+
 
 if __name__ == '__main__':
     unittest.main()
