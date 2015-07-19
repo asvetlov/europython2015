@@ -40,6 +40,7 @@ class Timer:
         self._waiter = None
 
     def close(self):
+        self._loop.remove_reader(self._fileno)
         os.close(self._fileno)
 
     def start(self, timeout):
