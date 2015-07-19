@@ -68,8 +68,11 @@ class Timer:
     @asyncio.coroutine
     def wait(self):
         assert self._waiter is not None
-        ret = yield from self._waiter
-        return ret
+        try:
+            ret = yield from self._waiter
+            return ret
+        finally:
+            self._waiter = None
 
 
 
