@@ -1,4 +1,5 @@
 import asyncio
+import ipdb
 import unittest
 
 
@@ -24,6 +25,16 @@ class Test(unittest.TestCase):
         @asyncio.coroutine
         def go():
             asyncio.sleep(0.5, loop=self.loop)  # missed `yield from`
+
+        self.loop.run_until_complete(go())
+
+
+    def test_ipdb(self):
+        @asyncio.coroutine
+        def go():
+            while True:
+                import ipdb; ipdb.set_trace()
+                yield from asyncio.sleep(60, loop=self.loop)
 
         self.loop.run_until_complete(go())
 
