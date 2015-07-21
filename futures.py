@@ -1,17 +1,50 @@
 import asyncio
-import unittest
 
 
-class TestFuture(unittest.TestCase):
+@asyncio.coroutine
+def normal():
+    fut = asyncio.Future()
+    print(fut)
 
-    def setUp(self):
-        self.loop = asyncio.new_event_loop()
-        self.set_event_loop(self.loop)
+    fut.set_result(123)
+    print(fut)
+    print(fut.result(), fut.exception())
+    ret = yield from fut
+    print(ret)
 
-    def tearDown(self):
-        self.loop.close()
 
-    def test_fut(self):
-        fut = asycnio.Future(loop=self.loop)
-        self.assertFalse(fut.done())
-        pass
+@asyncio.coroutine
+def exceptions():
+    fut = asyncio.Future()
+    print(fut)
+    fut.set_exception(ValueError("Failure"))
+    print(fut)
+    print(fut.exception())
+    try:
+        yield from fut
+    except Exception as exc:
+        print(exc)
+
+
+def callbacks():
+    fut = asyncio.Future()
+
+    def cb(f):
+        print('Callback', f)
+        print(f.result())
+
+    fut.add_done_callback(cb)
+
+    fut.set_result(123)
+
+    loop.stop()
+    loop.run_forever()
+
+
+loop = asyncio.get_event_loop()
+print("---- Normal ----")
+loop.run_until_complete(normal())
+print("---- Exceptions ----")
+loop.run_until_complete(exceptions())
+print("---- Callbacks ----")
+callbacks()
