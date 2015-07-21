@@ -33,7 +33,12 @@
    call_soon/call_later
    importance of timer support in event loop
 
-14. thread safety
+14. Synchronization primitives
+   locks
+   conditions
+   queues
+
+15. thread safety
    run_in_executor
    janus
 
