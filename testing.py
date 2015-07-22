@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
         self.loop.run_until_complete(go())
 
 
-    def test_ipdb(self):
+    def xtest_ipdb(self):
         @asyncio.coroutine
         def go():
             while True:

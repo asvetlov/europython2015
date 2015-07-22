@@ -42,9 +42,9 @@ def callbacks():
 
 
 loop = asyncio.get_event_loop()
-print("---- Normal ----")
-loop.run_until_complete(normal())
+#print("---- Normal ----")
+#loop.run_until_complete(normal())
 print("---- Exceptions ----")
 loop.run_until_complete(exceptions())
-print("---- Callbacks ----")
-callbacks()
+#print("---- Callbacks ----")
+#callbacks()

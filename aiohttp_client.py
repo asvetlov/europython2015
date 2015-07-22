@@ -20,7 +20,7 @@ def get_with_timeout(client):
         coro = client.get('http://httpbin.org/delay/10')
         yield from asyncio.wait_for(coro, 2)
     except asyncio.TimeoutError:
-        print("Timeout after waiting for 2 minutes")
+        print("Timeout after waiting for 2 seconds")
     else:
         print("No timeout exception, should never happen")
 
@@ -35,7 +35,7 @@ def get_random_data(client, num):
 
 @asyncio.coroutine
 def get_multiple(client):
-    print("Fetch by 3 parallel requests")
+    print("Fetch by 10 parallel requests")
     coros = []
     for i in range(10):
         coros.append(get_random_data(client, i))
